@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const {GoogleSpreadsheet}  = require('google-spreadsheet');
+// const {GoogleSpreadsheet}  = require('google-spreadsheet');
 const parseUrl = require('parse-url');
 const client = new Discord.Client();
 const config = require('./config.json');
@@ -55,17 +55,15 @@ var helpSections = {
     }
 }
 
-var hasRole = function (member, roleName) {
-    var roles = member.roles.cache.array();
-    for (var role of roles) {
-	if (role.name === roleName) {
-	    return true;
-	}
-    }
-    return false;
+function hasRole (member, roleName) {
+    return member.roles.cache.some(role => role.name === roleName);
 }
 
-var lockPerms = async function (channel) {
+function findRoleByName (guild, name) {
+	return guild.roles.cache.find(role => role.name === name);
+}
+
+async function lockPerms (channel) {
     // syncs channel's perms with its parent category
     await channel.lockPermissions();
     await channel.lockPermissions();
@@ -73,7 +71,7 @@ var lockPerms = async function (channel) {
 //    await channel.lockPermissions();
 }
 
-var getMentions = function (content, guild) {
+ function getMentions (content, guild) {
     var splitOnSpaces = content.split(/\s+/);
     var mentions = {
         roles: [],
@@ -93,7 +91,7 @@ var getMentions = function (content, guild) {
     return mentions;
 }
 
-var add = async function (role, to) {
+async function add (role, to) {
     await to.updateOverwrite(role, {
 	'VIEW_CHANNEL': true,
 	'SEND_MESSAGES': true,
@@ -103,13 +101,10 @@ var add = async function (role, to) {
 	'ATTACH_FILES': true,
 	'EMBED_LINKS': true
     });
-    var children = to.children.array();
-    await lockPerms(children[0]);
-    await lockPerms(children[1]);
-    return;
+    return Promise.all(to.children.map(lockPerms));
 }
 
-var remove = async function (role, from) {
+async function remove (role, from) {
     await from.updateOverwrite(role, {
 	'VIEW_CHANNEL': false,
 	'SEND_MESSAGES': false,
@@ -119,16 +114,12 @@ var remove = async function (role, from) {
 	'ATTACH_FILES': false,
 	'EMBED_LINKS': false
     });
-    var	children = from.children.array();
-    await lockPerms(children[0]);
-    await lockPerms(children[1]);
-    return;
+	return Promise.all(from.children.map(lockPerms));
 }
 
-var empty = async function (room) {
-    var overwrites = room.permissionOverwrites.array();
-    for (var overwrite of overwrites) {
-	var role = await room.guild.roles.fetch(overwrite.id);
+async function empty (room) {
+    for (var [id, overwrite] of room.permissionOverwrites) {
+	var role = await room.guild.roles.fetch(id);
 	try {
 	    //	    console.log(role.name);
 	    if (role.name !== '@everyone' && role.name !== 'Staff' && role.name !== 'Spectator') {
@@ -140,25 +131,18 @@ var empty = async function (room) {
 	    await overwrite.delete();
 	}
     }
-    var children = room.children.array();
-    await lockPerms(children[0]);
-    await lockPerms(children[1]);
-    return;
+	return Promise.all(room.children.map(lockPerms));
 }
 
-var createRoom = async function (guild, name, staffSpectatorInvisible) {
+async function createRoom (guild, name, staffSpectatorInvisible) {
     var category = await guild.channels.create(name, {type: 'category'});
     await category.updateOverwrite(guild.roles.everyone, {
 	'VIEW_CHANNEL': false
-    });
-    var staffRole = 0, spectatorRole = 0;
-    for (var role of guild.roles.cache.array()) {
-	if (role.name === 'Staff' && staffRole === 0) {
-	    staffRole = role;
-	} else if (role.name === 'Spectator' && spectatorRole === 0) {
-	    spectatorRole = role;
-	}
-    }
+	});
+	
+	var staffRole = findRoleByName(guild, 'Staff');
+	var spectatorRole = findRoleByName(guild, 'Spectator');
+
     if (!staffSpectatorInvisible) {
 	await category.updateOverwrite(staffRole, {
 	    'VIEW_CHANNEL': true
@@ -173,31 +157,31 @@ var createRoom = async function (guild, name, staffSpectatorInvisible) {
     return text;
 }
 
-var deleteRoom = async function (text) {
+async function deleteRoom (text) {
     var category = text.parent;
     var name = category.name;
-    for (var channel of category.children.array()) {
-	await channel.delete();
-    }
+
+	await Promise.all(category.children.map(channel => channel.delete()))
     await category.delete();
     return name;
 }
 
-var finalsRoom = async function (guild, team1, team2) {
-    var staffRole = 0, spectatorRole = 0, playerCoachRole = 0;
-    var teamRoles = [];
-    await guild.roles.fetch();
-    for (var role of guild.roles.cache.array()) {
-	if (role.name === 'Staff' && staffRole === 0) {
-	    staffRole = role;
-	} else if (role.name === 'Spectator' && spectatorRole === 0) {
-	    spectatorRole = role;
-	} else if (role.name === 'Player/Coach' && playerCoachRole === 0) {
-	    playerCoachRole = role;
-	} else if (role.name !== '@everyone' && role.name !== 'Tournament Bot' && role.name !== 'Yuki' && role.members.array().length > 0) {
-	    teamRoles.push(role);
-	}
-    }
+function isGeneralRole(role) {
+	return role.name === 'Staff' || role.name === 'Spectator' || role.name === 'Player/Coach';
+}
+
+function isDefaultRole(role) {
+	return role.name === '@everyone' || role.name === 'Tournament Bot' || role.name === 'Yuki' || role.name === 'Server Booster';
+}
+
+async function finalsRoom (guild, team1, team2) {
+	await guild.roles.fetch();
+	var staffRole = findRoleByName('Staff');
+	var spectatorRole = findRoleByName('Spectator');
+	var playerCoachRole = findRoleByName('Player/Coach');
+
+	var teamRoles = guild.roles.cache.filter(role => !isGeneralRole(role) && !isDefaultRole(role) && role.members.size > 0);
+
     var category = await guild.channels.create('Finals', {type: 'category', position: 3});
     /*
     await category.updateOverwrite(guild.roles.everyone, {
@@ -263,25 +247,14 @@ var finalsRoom = async function (guild, team1, team2) {
     return gameText;
 } // todo
 
-var init = async function (guild) {
+async function init (guild) {
     // basic setup of the tournament server
     // todo clear all existing stuff in the server
-    await guild.setDefaultMessageNotifications('MENTIONS');
-    var existingRoles = guild.roles.cache.array(); // does this really load all the roles? cache business confuses me D:
-    for (var role of existingRoles) {
-	if (role.name !== '@everyone' && role.name !== 'Tournament Bot' && role.name !== 'Yuki' && role.name !== 'Server Booster') {
-	    try {
-		await role.delete();
-	    } catch (e) {
-		console.error('could not delete role: ' + role.name);
-		console.error(e);
-	    }
-	}
-    } // empty out existing roles so the correct ones can take their place
-    existingChannels = guild.channels.cache.array(); // shrug
-    for (var channel of existingChannels) {
-	await channel.delete();
-    }
+	await guild.setDefaultMessageNotifications('MENTIONS');
+	
+	await Promise.all(guild.roles.cache.filter(role => !isDefaultRole(role)).map(role => role.delete()))
+	await Promise.all(guild.channels.cache.map(channel => channel.delete()))
+
     var controlRoomRole = await guild.roles.create({
 	data: {
 	    name: 'Control Room',
@@ -380,7 +353,7 @@ var init = async function (guild) {
     await guild.setSystemChannel(generalChannel);
 }
 
-var help = function (channel, sections) {
+ function help (channel, sections) {
     sections = sections || ['i', 'c', 'f', 'd', 'n', 'm', 'a', 'r', 't', 'e', 'h'];
     var helpMessage = {
 	color: '#29bb9c', // same as discord aqua
@@ -530,7 +503,7 @@ var schedule = async function (guild, docID, sheetIndex) {
     return;
 }
 
-var massCreateTeams = async function (guild, prefix, startIndex, endIndex) {
+ async function massCreateTeams (guild, prefix, startIndex, endIndex) {
     for (var i = startIndex; i <= endIndex; i++) {
 	var name = prefix + String(i);
 	var color = [Math.floor(Math.random()*256), Math.floor(Math.random()*256), Math.floor(Math.random()*256)];
@@ -553,17 +526,11 @@ var massCreateTeams = async function (guild, prefix, startIndex, endIndex) {
     return;
 }
 
-var setGuildBitrate = async function (bitrate, guild) {
-    for (var channel of guild.channels.cache.array()) {
-	if (channel.type === 'voice') {
-	    await channel.setBitrate(bitrate * 1000);
-//	    console.log('set bitrate for ' + channel.name);
-	}
-    }
-    return;
+async function setGuildBitrate (bitrate, guild) {
+	return Promise.all([guild.channels.cache.filter(channel => channel.type === 'voice').map(channel => channel.setBitrate(bitrate * 1000))])
 }
 
-var confirm = async function (message, prompt, force, failCallback, successCallback) {
+async function confirm (message, prompt, force, failCallback, successCallback) {
     if (force) {
 	message.react('👍');
 	successCallback();
@@ -584,7 +551,7 @@ var confirm = async function (message, prompt, force, failCallback, successCallb
     });
 }
 
-var processCommand = async function (command, message) {
+async function processCommand (command, message) {
     // var force = command.indexOf('--force') >= 0 ? 1 : 0;
     var force = false;
     var forceIndex = command.indexOf('--force');
@@ -681,7 +648,8 @@ var processCommand = async function (command, message) {
 	confirm(message, 'Are you sure you want to initialize the server? Every channel and role currently in the server will be deleted. Confirm by reacting with \:thumbsup:.', force, function () {
 	    message.channel.send('No confirmation was received. The initialization is cancelled.');
 	}, function () {
-	    init(message.channel.guild, message.channel).catch(function () {
+	    init(message.channel.guild, message.channel).catch(function (e) {
+		console.error(e)
 		help(message.channel, ['i']);
 	    });
 	});
@@ -875,7 +843,7 @@ client.on('message', async function (message) {
 
 client.login(config.token);
 client.on('ready', function () {
-    for (var guild of client.guilds.cache.array()) {
+    for (var [id, guild] of client.guilds.cache) {
 	console.log(guild.name + ' ' + guild.owner.user.tag);
     }
     client.user.setActivity('.help', {type: 'LISTENING'}).then(function () {
