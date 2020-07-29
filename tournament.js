@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const {GoogleSpreadsheet}  = require('google-spreadsheet');
 const parseUrl = require('parse-url');
 const client = new Discord.Client();
-const config = require('config.json');
+const config = require('./config.json');
 
 var helpSections = {
     'i': {
