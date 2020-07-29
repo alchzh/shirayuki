@@ -1,6 +1,6 @@
 {
-  "name": "yuki",
-  "version": "1.0.0",
+  "name": "shirayuki",
+  "version": "2.0.0",
   "description": "discord bot for creating and running online quizbowl tournaments",
   "main": "tournament.js",
   "scripts": {
@@ -8,20 +8,24 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kgurazad/tournament-bot.git"
+    "url": "git+https://github.com/acz13/shirayuki.git"
   },
   "keywords": [
     "discord"
   ],
-  "author": "Karan Gurazada",
+  "author": "Albert Zhang <alchzh@gmail.com>",
+  "contributors": [
+    "Karan Gurazada"
+  ],
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kgurazad/tournament-bot/issues"
+    "url": "https://github.com/acz13/shirayuki/issues"
   },
-  "homepage": "https://github.com/kgurazad/tournament-bot#readme",
+  "homepage": "https://github.com/acz13/shirayuki#readme",
   "dependencies": {
     "discord.js": "^12.2.0",
     "google-spreadsheet": "^3.0.11",
     "parse-url": "^5.0.1"
-  }
+  },
+  "private": true
 }
