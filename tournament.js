@@ -1,9 +1,8 @@
 const Discord = require('discord.js');
-const fs = require('fs');
 const {GoogleSpreadsheet}  = require('google-spreadsheet');
 const parseUrl = require('parse-url');
 const client = new Discord.Client();
-const config = JSON.parse(String(fs.readFileSync(__dirname + '/config.json')));
+const config = require('config.json');
 
 var helpSections = {
     'i': {
