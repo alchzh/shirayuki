@@ -53,13 +53,7 @@ const createTeamCommand = {
       flags.force
     );
     for (const name of args) {
-      try {
-        const team = await createTeam(message.channel.guild, name);
-
-        message.channel.send(`Role "${team.name}" has been created.`);
-      } catch (e) {
-        message.channel.send(`Team "${name}" could not be created. Please try using a different name.`);
-      }
+      await createTeam(message.channel.guild, name);
     }
   },
 };
