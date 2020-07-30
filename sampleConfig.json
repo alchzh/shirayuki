@@ -1,4 +1,9 @@
 {
     "token": "<DISCORD TOKEN>",
-    "apiKey": "<GOOGLE SPREADSHEETS API KEY>"
+    "apiKey": "<GOOGLE SPREADSHEETS API KEY>",
+    "prefix": ".",
+    "confirmWaitTime": 6000,
+    "name": "Shirayuki",
+    "embedColor": "LIGHT_GREY",
+    "botOwner": "<YOUR DISCORD ID>"
 }

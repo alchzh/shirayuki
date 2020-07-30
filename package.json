@@ -2,9 +2,9 @@
   "name": "shirayuki",
   "version": "2.0.0",
   "description": "discord bot for creating and running online quizbowl tournaments",
-  "main": "tournament.js",
+  "main": "app.js",
   "scripts": {
-    "test": "node tournament.js"
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -22,10 +22,20 @@
     "url": "https://github.com/acz13/shirayuki/issues"
   },
   "homepage": "https://github.com/acz13/shirayuki#readme",
+  "private": true,
+  "type": "module",
   "dependencies": {
+    "discord-command-parser": "^1.4.3",
     "discord.js": "^12.2.0",
     "google-spreadsheet": "^3.0.11",
     "parse-url": "^5.0.1"
   },
-  "private": true
+  "devDependencies": {
+    "eslint": "^7.5.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "prettier": "^2.0.5"
+  }
 }
