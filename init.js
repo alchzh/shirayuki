@@ -33,7 +33,7 @@ export default async function init(guild) {
   }
 
   await Promise.all([
-    guild.channels.announcementChannel.send(
+    guild.channels.announcementsText.send(
       `${guild.name} is committed to ensuring that quizbowl is safe, open, and welcoming for everyone. If anyone at this tournament makes you feel unsafe or unwelcome,` +
         `please do not hesitate to reach out to anyone with the ${guild.roles.controlRoom.toString()} or ${guild.roles.staff.toString()} roles. In addition, please feel` +
         `free to make use of the quizbowl misconduct form, a joint effort by PACE, NAQT, ACF, and IAC [https://tinyurl.com/qbmisconduct].`
