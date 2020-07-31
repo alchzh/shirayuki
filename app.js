@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { Client, RoleManager, GuildChannelManager } from "discord.js";
+import { Client, RoleManager, GuildChannelManager, Role } from "discord.js";
 import parser from "discord-command-parser";
 
 import "./lib/discordjs-ext/updateOverwrites.js";
@@ -7,7 +7,7 @@ import "./lib/discordjs-ext/updateOverwrites.js";
 import config from "./config.js";
 import { executeCommand, findCommand } from "./lib/commands.js";
 import { loadCommmandsFromFiles } from "./commandLoader.js";
-import { registerMany } from "./lib/discordjs-ext/register.js";
+import { registerMany, register } from "./lib/discordjs-ext/register.js";
 
 import serverTemplate from "./serverTemplate.js";
 import createPartialMessage from "./lib/discordjs-ext/createPartialMessage.js";
@@ -18,6 +18,9 @@ client.config = config;
 
 (function registerRoles() {
   registerMany(RoleManager, serverTemplate.roles);
+  register(RoleManager, "everyone", function isEveryone(r, _this) {
+    return r.id === _this.guild.id;
+  });
 })();
 
 (function registerChannels() {

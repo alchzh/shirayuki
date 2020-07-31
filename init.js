@@ -44,8 +44,8 @@ export default async function init(guild) {
           `the ${guild.roles.resolve("controlRoom")} or ${guild.roles.resolve("staff")} roles.` +
           `addition, please feel free to make use of the quizbowl misconduct form, a joint effort by PACE, NAQT, ACF, and IAC [https://tinyurl.com/qbmisconduct].`
       ),
-    guild.owner.roles.add(guild.roles.controlRoom),
+    guild.owner.roles.add(guild.roles.resolve("controlRoom")),
     guild.setDefaultMessageNotifications("MENTIONS"),
-    guild.setSystemChannel(guild.channels.generalText),
+    guild.setSystemChannel(guild.channels.resolve("channelText")),
   ]);
 }
