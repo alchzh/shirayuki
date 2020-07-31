@@ -1,14 +1,5 @@
 import { confirm } from "../lib/commands.js";
-import { reloadRoles } from "../lib/roles.js";
-import {
-  addToRoom,
-  removeFromRoom,
-  emptyRoom,
-  createRoom,
-  deleteRoom,
-  updateOverwrites,
-  isDefaultRoom,
-} from "../lib/rooms.js";
+import { addToRoom, removeFromRoom, emptyRoom, createRoom, deleteRoom, isDefaultRoom } from "../lib/rooms.js";
 import { channelSort } from "../lib/sort.js";
 
 export const add = {
@@ -168,7 +159,7 @@ export const createFinals = {
       flags.force
     );
 
-    await reloadRoles(guild);
+    await guild.roles.fetch();
 
     const { everyone, staff, spectator, playerCoach } = guild.roles;
 
@@ -205,18 +196,18 @@ export const createFinals = {
 
     await Promise.all([
       // Room Permissions
-      room.updateOverwrite(everyone, {
+      room.updateOverwrites(everyone, {
         VIEW_CHANNEL: false,
       }),
-      updateOverwrites(room, [staff, spectator, playerCoach], {
+      room.updateOverwrites([staff, spectator, playerCoach], {
         VIEW_CHANNEL: true,
       }),
 
       // Text Channel Permissions
-      updateOverwrites(gameText, [spectator, playerCoach], {
+      gameText.updateOverwrites([spectator, playerCoach], {
         SEND_MESSAGES: false,
       }),
-      updateOverwrites(gameText, [team1, team2], {
+      gameText.updateOverwrites([team1, team2], {
         SEND_MESSAGES: true,
       }),
 
@@ -227,18 +218,18 @@ export const createFinals = {
       // it gives every non-team1/team2 team permissions to view and takes away view permissions from the general player/coach role
       // this solution assumes every player is given a team; if that's not the case, it won't work perfectly
       // it's better than letting the teams see the audience chat though; allowing that might result in some form of cheating
-      updateOverwrites(audienceText, [team1, team2 /* , playerCoach */], {
+      audienceText.updateOverwrites([team1, team2 /* , playerCoach */], {
         VIEW_CHANNEL: false,
       }),
       /*
-      updateOverwrites(audienceText, otherTeams, {
+      audienceText.updateOverwrites(otherTeams, {
         VIEW_CHANNEL: true,
       }),
       */
 
       // Voice Permissions
       /*
-      updateOverwrites(voice, [spectator, playerCoach], {
+      voice.updateOverwrites([spectator, playerCoach], {
         VIEW_CHANNEL: false,
       }),
       */

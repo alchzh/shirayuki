@@ -1,37 +1,39 @@
 /* eslint-disable no-console */
-import { Client } from "discord.js";
+import { Client, RoleManager, GuildChannelManager } from "discord.js";
 import parser from "discord-command-parser";
+
+import "./lib/discordjs-ext/updateOverwrites.js";
 
 import config from "./config.js";
 import { executeCommand } from "./lib/commands.js";
 import { loadCommmandsFromFiles } from "./commandLoader.js";
-import { reloadRoles } from "./lib/roles.js";
-import MessageMentionsRegex from "./lib/MessageMentionsRegex.js";
+import { registerMany } from "./lib/discordjs-ext/register.js";
+
+import serverTemplate from "./serverTemplate.js";
+import createPartialMessage from "./lib/discordjs-ext/createPartialMessage.js";
 
 const client = new Client();
 
 client.config = config;
 
-function partialMessage(message, part) {
-  const partial = Object.create(message, {
-    content: { value: part },
-  });
+(function registerRoles() {
+  registerMany(RoleManager, serverTemplate.roles);
+})();
 
-  partial.mentions = new MessageMentionsRegex(partial);
-
-  return partial;
-}
+(function registerChannels() {
+  registerMany(GuildChannelManager, serverTemplate.channels);
+})();
 
 client.on("ready", async function onReady() {
   Promise.all(
     client.guilds.cache.map(guild => {
       console.log(`${guild.name} ${guild.owner.user.tag}`);
-      return reloadRoles(guild);
+      return guild.roles.fetch();
     })
   ).then(() => {
     client.on("message", async function onMessage(message) {
       for (const line of message.content.split("\n")) {
-        const parsed = parser.parse(partialMessage(message, line), config.prefix);
+        const parsed = parser.parse(createPartialMessage(message, line), config.prefix);
 
         if (!parsed.success) return;
 
@@ -40,6 +42,7 @@ client.on("ready", async function onReady() {
           await executeCommand(parsed);
         } catch (e) {
           message.react("❌").catch(() => {});
+          console.error(e);
           return;
         }
       }
@@ -48,7 +51,7 @@ client.on("ready", async function onReady() {
     });
 
     client.on("guildCreate", guild => {
-      reloadRoles(guild);
+      guild.roles.fetch();
     });
 
     client.user
