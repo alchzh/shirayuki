@@ -8,22 +8,22 @@ export default async function init(guild) {
 
   // // Teardown
   await Promise.all([
-    // ...guild.roles.cache.filter(role => !isDefaultRole(role)).map(role => role.delete()),
+    ...guild.roles.cache.filter(role => !isDefaultRole(role)).map(role => role.delete()),
     ...guild.channels.cache.map(channel => channel.delete()),
   ]);
 
-  // // Build roles from template
-  // for (const roleData of Object.values(serverTemplate.roles)) {
-  //   const promise = guild.roles.create({
-  //     data: {
-  //       hoist: true,
-  //       mentionable: true,
-  //       position: 1,
-  //       ...roleData,
-  //     },
-  //   });
-  //   await promise;
-  // }
+  // Build roles from template
+  for (const roleData of Object.values(serverTemplate.roles)) {
+    const promise = guild.roles.create({
+      data: {
+        hoist: true,
+        mentionable: true,
+        position: 1,
+        ...roleData,
+      },
+    });
+    await promise;
+  }
 
   // Build channels from template
   for (const { name, parent, overwrites, ...channelData } of Object.values(serverTemplate.channels)) {
