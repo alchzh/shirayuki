@@ -5,7 +5,7 @@ import parser from "discord-command-parser";
 import "./lib/discordjs-ext/updateOverwrites.js";
 
 import config from "./config.js";
-import { executeCommand } from "./lib/commands.js";
+import { executeCommand, findCommand } from "./lib/commands.js";
 import { loadCommmandsFromFiles } from "./commandLoader.js";
 import { registerMany } from "./lib/discordjs-ext/register.js";
 
@@ -34,12 +34,13 @@ client.on("ready", async function onReady() {
     client.on("message", async function onMessage(message) {
       for (const line of message.content.split("\n")) {
         const parsed = parser.parse(createPartialMessage(message, line), config.prefix);
-
         if (!parsed.success) return;
 
-        // eslint-disable-next-line no-await-in-loop
+        const command = findCommand(message.client, parsed.command);
+        if (!command) return;
+
         try {
-          await executeCommand(parsed);
+          await executeCommand(command, parsed);
         } catch (e) {
           message.react("❌").catch(() => {});
           console.error(e);
