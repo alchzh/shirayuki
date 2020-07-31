@@ -42,7 +42,7 @@ export default async function init(guild) {
       .send(
         `${guild.name} is committed to ensuring that quizbowl is safe, open, and welcoming for everyone. If anyone at this tournament makes you feel unsafe or unwelcome, please do not hesitate to reach out to anyone with ` +
           `the ${guild.roles.resolve("controlRoom")} or ${guild.roles.resolve("staff")} roles.` +
-          `addition, please feel free to make use of the quizbowl misconduct form, a joint effort by PACE, NAQT, ACF, and IAC [https://tinyurl.com/qbmisconduct].`
+          `In addition, please feel free to make use of the quizbowl misconduct form, a joint effort by PACE, NAQT, ACF, and IAC [https://tinyurl.com/qbmisconduct].`
       ),
     guild.owner.roles.add(guild.roles.resolve("controlRoom")),
     guild.setDefaultMessageNotifications("MENTIONS"),
