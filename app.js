@@ -18,9 +18,7 @@ client.config = config;
 
 (function registerRoles() {
   registerMany(RoleManager, serverTemplate.roles);
-  register(RoleManager, "everyone", function isEveryone(r, _this) {
-    return r.id === _this.guild.id;
-  });
+  register(RoleManager, "everyone", (r, _this) => r.id === _this.guild.id);
 })();
 
 (function registerChannels() {
