@@ -1,6 +1,6 @@
 import { roleSort, channelSort } from "../lib/sort.js";
 import { isTeamRole } from "../lib/roles.js";
-import { roomsOfRole, rolesInRoom, isDefaultRoom } from "../lib/rooms.js";
+import { roomsOfRole, rolesInRoom, isGeneralRoom } from "../lib/rooms.js";
 
 // TODO: Clean up and make these two messy commands DRYer
 export const locate = {
@@ -55,7 +55,7 @@ export const list = {
       ? message.mentions.rooms
       : channelSort(
           message.guild.channels.cache.filter(
-            channel => channel.type === "category" && (allRooms || !isDefaultRoom(channel))
+            channel => channel.type === "category" && (allRooms || !isGeneralRoom(channel))
           )
         );
 

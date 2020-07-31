@@ -16,7 +16,7 @@ const initCommand = {
       flags.force
     );
 
-    return init(message.guild);
+    await init(message.guild);
   },
 };
 

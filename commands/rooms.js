@@ -1,5 +1,5 @@
 import { confirm } from "../lib/commands.js";
-import { addToRoom, removeFromRoom, emptyRoom, createRoom, deleteRoom, isDefaultRoom } from "../lib/rooms.js";
+import { addToRoom, removeFromRoom, emptyRoom, createRoom, deleteRoom, isGeneralRoom } from "../lib/rooms.js";
 import { channelSort } from "../lib/sort.js";
 
 export const add = {
@@ -83,7 +83,7 @@ export const empty = {
       ? message.mentions.rooms
       : channelSort(
           message.guild.channels.cache.filter(
-            channel => channel.type === "category" && !isDefaultRoom(channel)
+            channel => channel.type === "category" && !isGeneralRoom(channel)
           )
         );
 
