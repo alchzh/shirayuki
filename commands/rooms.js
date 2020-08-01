@@ -159,10 +159,6 @@ export const createFinals = {
       flags.force
     );
 
-    await guild.roles.fetch();
-
-    const { everyone, staff, spectator, playerCoach } = guild.roles;
-
     /*
     const otherTeams = guild.roles.cache.filter(
       role =>
@@ -196,15 +192,15 @@ export const createFinals = {
 
     await Promise.all([
       // Room Permissions
-      room.updateOverwrites(everyone, {
+      room.updateOverwrites("everyone", {
         VIEW_CHANNEL: false,
       }),
-      room.updateOverwrites([staff, spectator, playerCoach], {
+      room.updateOverwrites(["staff", "spectator", "playerCoach"], {
         VIEW_CHANNEL: true,
       }),
 
       // Text Channel Permissions
-      gameText.updateOverwrites([spectator, playerCoach], {
+      gameText.updateOverwrites(["spectator", "playerCoach"], {
         SEND_MESSAGES: false,
       }),
       gameText.updateOverwrites([team1, team2], {
@@ -229,7 +225,7 @@ export const createFinals = {
 
       // Voice Permissions
       /*
-      voice.updateOverwrites([spectator, playerCoach], {
+      voice.updateOverwrites(["spectator", "playerCoach"], {
         VIEW_CHANNEL: false,
       }),
       */
