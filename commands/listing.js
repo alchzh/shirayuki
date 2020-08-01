@@ -29,7 +29,7 @@ export const locate = {
       }
     });
 
-    return message.channel.send({
+    await message.channel.send({
       embed: {
         color: message.client.config.embedColor || "WHITE",
         title: "Locate",
@@ -73,7 +73,7 @@ export const list = {
       }
     });
 
-    return message.channel.send({
+    await message.channel.send({
       embed: {
         color: message.client.config.embedColor || "WHITE",
         title: "List",

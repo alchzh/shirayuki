@@ -20,7 +20,7 @@ export const add = {
       flags.force
     );
 
-    return addToRoom(room, ...roles.array());
+    await addToRoom(room, ...roles.array());
   },
 };
 
@@ -43,7 +43,7 @@ export const remove = {
       flags.force
     );
 
-    return removeFromRoom(room, ...roles.array());
+    await removeFromRoom(room, ...roles.array());
   },
 };
 
@@ -66,7 +66,7 @@ export const transfer = {
       flags.force
     );
 
-    return Promise.all([removeFromRoom(from, role), addToRoom(to, role)]);
+    await Promise.all([removeFromRoom(from, role), addToRoom(to, role)]);
   },
 };
 
@@ -93,7 +93,7 @@ export const empty = {
       flags.force
     );
 
-    return Promise.all(rooms.map(room => emptyRoom(room)));
+    await Promise.all(rooms.map(room => emptyRoom(room)));
   },
 };
 
@@ -135,7 +135,7 @@ const deleteCommand = {
       flags.force
     );
 
-    return Promise.all(rooms.map(room => deleteRoom(room)));
+    await Promise.all(rooms.map(room => deleteRoom(room)));
   },
 };
 

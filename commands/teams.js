@@ -74,7 +74,7 @@ const deleteTeamCommand = {
       flags.force
     );
 
-    return Promise.all(teams.map(team => deleteTeam(team)));
+    await Promise.all(teams.map(team => deleteTeam(team)));
   },
 };
 export { deleteTeamCommand as deleteTeam };
