@@ -15,7 +15,7 @@ export const massCreateTeams = {
   exec: async function execMassCreateTeams({ message, args, flags }) {
     const ranges = args.map(RegExp.prototype.exec, rangePattern);
 
-    for (const range in ranges) {
+    for (const range of ranges) {
       if (range === null) {
         throw new ArgumentsError(`invalid range format ${range}`);
       }
