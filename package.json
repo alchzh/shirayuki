@@ -28,7 +28,6 @@
   "dependencies": {
     "discord-command-parser": "^1.4.3",
     "discord.js": "^12.2.0",
-    "google-spreadsheet": "^3.0.11",
     "parse-url": "^5.0.1"
   },
   "devDependencies": {
