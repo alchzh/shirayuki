@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { Client, RoleManager, GuildChannelManager, Role } from "discord.js";
+import { Client, RoleManager, GuildChannelManager } from "discord.js";
 import parser from "discord-command-parser";
 
 import "./lib/discordjs-ext/updateOverwrites.js";

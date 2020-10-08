@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import fs from "fs";
 
 const config = JSON.parse(fs.readFileSync("./config.json"));
