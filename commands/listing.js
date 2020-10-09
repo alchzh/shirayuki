@@ -10,7 +10,7 @@ export const locate = {
     "If no teams specified, will locate all teams. Using the `--all-roles` flag will show all roles. Using the `--all-rooms` flag will show all rooms (not only game rooms).\nExample usage: `.locate @A1`\nExample usage: `.find @A1`",
   aliases: ["find", "where"],
   permLevel: 3,
-  exec: async function execList({ message, flags }) {
+  exec: async function execLocate({ message, flags }) {
     const allRoles = flags.allRoles || flags.all;
     const allRooms = flags.allRooms || flags.all;
 
