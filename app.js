@@ -11,6 +11,7 @@ import { registerMany, register } from "./lib/discordjs-ext/register.js";
 
 import serverTemplate from "./serverTemplate.js";
 import createPartialMessage from "./lib/discordjs-ext/createPartialMessage.js";
+import colorGenerator from "./lib/colorGenerator.js";
 
 const client = new Client();
 
@@ -29,6 +30,7 @@ client.on("ready", async function onReady() {
   Promise.all(
     client.guilds.cache.map(guild => {
       console.log(`${guild.name} ${guild.owner.user.tag}`);
+      guild.colorGenerator = colorGenerator();
       return guild.roles.fetch();
     })
   ).then(() => {
