@@ -15,10 +15,23 @@ export const massCreateTeams = {
   exec: async function execMassCreateTeams({ message, args, flags }) {
     const ranges = args.map(RegExp.prototype.exec, rangePattern);
 
+    let totalTeams = 0;
+
     for (const range of ranges) {
       if (range === null) {
         throw new ArgumentsError(`invalid range format ${range}`);
       }
+
+      totalTeams += Number(range[3]) - Number(range[2]) + 1;
+    }
+
+    const possibleChannels = 500 - message.guild.channels.cache.size;
+    if (totalTeams * 3 > possibleChannels) {
+      throw new ArgumentsError(
+        `cannot create ${totalTeams} teams because of Discord's 500 channel limit. ` +
+          // eslint-disable-next-line radix
+          `${parseInt(possibleChannels / 3)} teams are possible`
+      );
     }
 
     await confirm(

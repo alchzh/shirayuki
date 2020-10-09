@@ -5,7 +5,7 @@ import parser from "discord-command-parser";
 import "./lib/discordjs-ext/updateOverwrites.js";
 
 import config from "./config.js";
-import { executeCommand, findCommand } from "./lib/commands.js";
+import { executeCommand, findCommand, ArgumentsError, ConfirmationError } from "./lib/commands.js";
 import { loadCommmandsFromFiles } from "./commandLoader.js";
 import { registerMany, register } from "./lib/discordjs-ext/register.js";
 
@@ -46,7 +46,12 @@ client.on("ready", async function onReady() {
           await executeCommand(command, parsed);
         } catch (e) {
           message.react("❌").catch(() => {});
-          console.error(e);
+
+          if (!(e instanceof ConfirmationError || e instanceof ArgumentsError)) {
+            console.error(e);
+            console.error(e.stack);
+          }
+
           return;
         }
       }
@@ -63,7 +68,7 @@ client.on("ready", async function onReady() {
       .then(() => {
         console.log("up and running!");
       })
-      .catch(console.error);
+      .catch(e => console.error(e));
   });
 });
 
