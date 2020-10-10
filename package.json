@@ -2,10 +2,10 @@
   "name": "shirayuki",
   "version": "2.0.0",
   "description": "discord bot for creating and running online quizbowl tournaments",
-  "main": "app.js",
+  "main": "src/app.js",
   "scripts": {
-    "start": "node app.js",
-    "lint": "eslint **/*.js --ignore-path .gitignore --ignore-path .git/info/exclude"
+    "start": "node src/app.js",
+    "lint": "eslint src/**/*.js --ignore-path .gitignore --ignore-path .git/info/exclude"
   },
   "repository": {
     "type": "git",
