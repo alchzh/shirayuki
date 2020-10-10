@@ -7,10 +7,12 @@ import { getPermissionLevel, isTeamRole } from "./roles.js";
 
 // Custom Errors
 export class ConfirmationError extends Error {
-  constructor(message = "", ...args) {
-    super(message, ...args);
+  constructor(confirmMessage, confirmReaction, ...args) {
+    super("", ...args);
 
     this.name = "ConfirmationError";
+    this.confirmMessage = confirmMessage;
+    this.confirmReaction = confirmReaction;
   }
 }
 
@@ -36,6 +38,7 @@ export async function confirm(message, prompt, force) {
   const confirmMessage = await message.channel.send(
     `${prompt} Confirm by reacting with :thumbsup: or by typing \`yes\`.`
   );
+  message.channel.confirmMessage = confirmMessage;
 
   const confirmReaction = await confirmMessage.react("👍");
 
@@ -45,13 +48,16 @@ export async function confirm(message, prompt, force) {
       { max: 1, time: config.confirmWaitTime }
     ),
     message.channel.awaitMessages(
-      m => m.author.id === message.author.id && m.content.charAt(0).toLowerCase() === "y",
+      m =>
+        message.channel.confirmMessage === confirmMessage &&
+        m.author.id === message.author.id &&
+        m.content.trim().charAt(0).toLowerCase() === "y",
       { max: 1, time: config.confirmWaitTime }
     ),
   ]);
 
   if (collected.size === 0) {
-    throw new ConfirmationError(prompt);
+    throw new ConfirmationError(confirmMessage, confirmReaction, prompt);
   }
 
   const collect = collected.first();
@@ -123,7 +129,15 @@ export async function executeCommand(command, { message, arguments: _args }) {
     await command.exec({ message, args, flags });
   } catch (e) {
     if (e instanceof ConfirmationError) {
-      await message.channel.send(`No confirmation was received. Command \`${command.name}\` was canceled.`);
+      if (e.confirmMessage) {
+        await e.confirmMessage.edit(
+          `${e.confirmMessage.content}\nNo confirmation was received. Command \`${command.name}\` was canceled.`
+        );
+      }
+
+      if (e.confirmReaction) {
+        await e.confirmReaction.users.remove(message.client.user.id);
+      }
 
       throw e;
     } else {

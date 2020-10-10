@@ -27,49 +27,49 @@ client.config = config;
 })();
 
 client.on("ready", async function onReady() {
-  Promise.all(
+  await Promise.all(
     client.guilds.cache.map(guild => {
       console.log(`${guild.name} ${guild.owner.user.tag}`);
       guild.colorGenerator = colorGenerator();
       return guild.roles.fetch();
     })
-  ).then(() => {
-    client.on("message", async function onMessage(message) {
-      for (const line of message.content.split("\n")) {
-        const parsed = parser.parse(createPartialMessage(message, line), config.prefix);
-        if (!parsed.success) return;
+  );
 
-        const command = findCommand(message.client, parsed.command);
-        if (!command) return;
+  client.on("message", async function onMessage(message) {
+    for (const line of message.content.split("\n")) {
+      const parsed = parser.parse(createPartialMessage(message, line), config.prefix);
+      if (!parsed.success) return;
 
-        try {
-          await executeCommand(command, parsed);
-        } catch (e) {
-          message.react("❌").catch(() => {});
+      const command = findCommand(message.client, parsed.command);
+      if (!command) return;
 
-          if (!(e instanceof ConfirmationError || e instanceof ArgumentsError)) {
-            console.error(e);
-            console.error(e.stack);
-          }
+      try {
+        await executeCommand(command, parsed);
+      } catch (e) {
+        message.react("❌").catch(() => {});
 
-          return;
+        if (!(e instanceof ConfirmationError || e instanceof ArgumentsError)) {
+          console.error(e);
+          console.error(e.stack);
         }
+
+        return;
       }
+    }
 
-      message.react("✅").catch(() => {});
-    });
-
-    client.on("guildCreate", guild => {
-      guild.roles.fetch();
-    });
-
-    client.user
-      .setActivity(".help", { type: "LISTENING" })
-      .then(() => {
-        console.log("up and running!");
-      })
-      .catch(e => console.error(e));
+    message.react("✅").catch(() => {});
   });
+
+  client.on("guildCreate", guild => {
+    guild.roles.fetch();
+  });
+
+  client.user
+    .setActivity(".help", { type: "LISTENING" })
+    .then(() => {
+      console.log("up and running!");
+    })
+    .catch(e => console.error(e));
 });
 
 loadCommmandsFromFiles(client, "./commands").then(() => {
