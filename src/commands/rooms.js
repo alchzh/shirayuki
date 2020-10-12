@@ -1,5 +1,14 @@
+import { MessageMentions } from "discord.js";
 import { confirm } from "../lib/commands.js";
-import { addToRoom, removeFromRoom, emptyRoom, createRoom, deleteRoom, isGeneralRoom } from "../lib/rooms.js";
+import {
+  addToRoom,
+  removeFromRoom,
+  emptyRoom,
+  createRoom,
+  deleteRoom,
+  isGeneralRoom,
+  renameRoom,
+} from "../lib/rooms.js";
 import { channelSort } from "../lib/sort.js";
 
 export const add = {
@@ -122,7 +131,7 @@ const deleteCommand = {
   name: "delete",
   shortdesc: "Delete Room(s)",
   description:
-    "This command can only be run by users with the Control Room role.\nExample bot-style usage: `.d #room-1`\nExample NL-style usage: `.delete Room 1`",
+    "This command can only be run by users with the Control Room role.\nExample bot-style usage: `.d #room-1`\nExample NL-style usage: `.delete #room-1`",
   aliases: ["d", "del", "delete-room", "delete-rooms"],
   permLevel: 4,
   minRooms: 1,
@@ -140,6 +149,36 @@ const deleteCommand = {
 };
 
 export { deleteCommand as delete };
+
+const renameRoomCommand = {
+  name: "rename-room",
+  shortdec: "Rename Room",
+  description:
+    'This command can only be run by users with the Control Room role.\nExample bot-style usage: `.rr #room-1 "Playoffs 1"`\nExample NL-style usage: `.rename-room #room-1 "Playoffs 1"`',
+  aliases: ["rr"],
+  permLevel: 4,
+  minRooms: 1,
+  minArgs: 2,
+  exec: async function execRenameRoom({ message, args, flags }) {
+    const room = message.mentions.rooms.first();
+    let newName = args[0];
+
+    if (MessageMentions.CHANNELS_PATTERN.test(newName)) {
+      // eslint-disable-next-line prefer-destructuring
+      newName = args[1];
+    }
+
+    await confirm(
+      message,
+      `Are you sure you want to rename room \`${room.name}\` to \`${newName}\`?`,
+      flags.force
+    );
+
+    await renameRoom(room, newName);
+  },
+};
+
+export { renameRoomCommand as renameRoom };
 
 export const createFinals = {
   name: "create-finals",

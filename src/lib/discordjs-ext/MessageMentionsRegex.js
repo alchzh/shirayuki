@@ -2,7 +2,7 @@
 /* eslint-disable no-underscore-dangle */
 import { MessageMentions, Collection } from "discord.js";
 
-const { EVERYONE_PATTERN, USERS_PATTERN, ROLES_PATTERN } = MessageMentions;
+export const { EVERYONE_PATTERN, USERS_PATTERN, ROLES_PATTERN } = MessageMentions;
 
 export default class MessageMentionsRegex extends MessageMentions {
   constructor(message) {

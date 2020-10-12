@@ -1,4 +1,4 @@
-import { createRoom, addToRoom, deleteRoom } from "./rooms.js";
+import { createRoom, addToRoom, deleteRoom, renameRoom } from "./rooms.js";
 
 // eslint-disable-next-line import/prefer-default-export
 export async function createTeam(guild, name) {
@@ -20,14 +20,27 @@ export async function createTeam(guild, name) {
   return teamRole;
 }
 
-export async function deleteTeam(team) {
-  const category = team.guild.channels.cache.find(
+function huddleOf(team) {
+  return team.guild.channels.cache.find(
     c =>
       c.type === "category" &&
       c.name.toLowerCase() === `${team.name.toLowerCase()} huddle` &&
       team.permissionsIn(c).has(["VIEW_CHANNEL", "CONNECT"])
   );
+}
+
+export async function deleteTeam(team) {
+  const huddle = huddleOf(team);
 
   await team.delete();
-  if (category) await deleteRoom(category);
+  if (huddle) await deleteRoom(huddle);
+}
+
+export async function renameTeam(team, newName) {
+  const huddle = huddleOf(team);
+
+  await Promise.all([team.setName(newName), huddle ? renameRoom(huddle, `${newName} Huddle`) : null]);
+  await team.guild.fetch();
+
+  return team;
 }

@@ -1,6 +1,6 @@
 import { ArgumentsError, confirm } from "../lib/commands.js";
-import { createTeam, deleteTeam } from "../lib/teams.js";
-import { isTeamRole } from "../lib/roles.js";
+import { createTeam, deleteTeam, renameTeam } from "../lib/teams.js";
+import { ROLES_PATTERN } from "../lib/discordjs-ext/MessageMentionsRegex.js";
 
 const rangePattern = /^(\w+)\[([0-9]+)\.\.\.([0-9]+)\]$/;
 
@@ -80,7 +80,7 @@ const deleteTeamCommand = {
   permLevel: 4,
   minTeams: 1,
   exec: async function execCreateTeam({ message, flags }) {
-    const teams = message.mentions.roles.filter(team => isTeamRole(team));
+    const { teams } = message.mentions;
     await confirm(
       message,
       `Are you sure you want to delete team(s) ${teams.array().join(", ")}?`,
@@ -91,3 +91,33 @@ const deleteTeamCommand = {
   },
 };
 export { deleteTeamCommand as deleteTeam };
+
+const renameTeamCommand = {
+  name: "rename-team",
+  shortdec: "Rename Team",
+  description:
+    "This command can only be run by users with the Control Room role.\nExample bot-style usage: `.rt @A1 P1`\nExample NL-style usage: `.rename-team @A1 P1`",
+  aliases: ["rt", "rename"],
+  permLevel: 4,
+  minTeams: 1,
+  minArgs: 2,
+  exec: async function execRenameRoom({ message, args, flags }) {
+    const team = message.mentions.teams.first();
+    let newName = args[0];
+
+    if (ROLES_PATTERN.test(newName)) {
+      // eslint-disable-next-line prefer-destructuring
+      newName = args[1];
+    }
+
+    await confirm(
+      message,
+      `Are you sure you want to rename team ${team} \`${team.name}\` to \`${newName}\`?`,
+      flags.force
+    );
+
+    await renameTeam(team, newName);
+  },
+};
+
+export { renameTeamCommand as renameTeam };

@@ -54,7 +54,10 @@ export async function addToRoom(room, ...roles) {
     ATTACH_FILES: true,
     EMBED_LINKS: true,
   });
-  return Promise.all(room.children.map(lockPerms));
+
+  await Promise.all(room.children.map(lockPerms));
+
+  return room;
 }
 
 export async function removeFromRoom(room, ...roles) {
@@ -67,7 +70,10 @@ export async function removeFromRoom(room, ...roles) {
     ATTACH_FILES: false,
     EMBED_LINKS: false,
   });
-  return Promise.all(room.children.map(lockPerms));
+
+  await Promise.all(room.children.map(lockPerms));
+
+  return room;
 }
 
 export async function emptyRoom(room) {
@@ -77,7 +83,9 @@ export async function emptyRoom(room) {
       .map(overwrite => overwrite.delete())
   );
 
-  return Promise.all(room.children.map(lockPerms));
+  await Promise.all(room.children.map(lockPerms));
+
+  return room;
 }
 
 export async function createRoom(guild, name, staffSpectatorInvisible = false) {
@@ -115,4 +123,20 @@ export async function deleteRoom(room) {
   await room.delete();
 
   return name;
+}
+
+export async function renameRoom(room, newName) {
+  const cleanNewName = newName.replace(/\s+/g, "-").toLowerCase();
+  const textChannel = room.children.find(channel => channel.type === "text");
+  const voiceChannel = room.children.find(channel => channel.type === "voice");
+
+  await Promise.all([
+    room.setName(newName),
+    textChannel.setName(`${cleanNewName}-text`),
+    voiceChannel.setName(`${cleanNewName}-voice`),
+  ]);
+
+  await room.guild.fetch();
+
+  return room;
 }
