@@ -29,7 +29,7 @@ client.config = config;
 client.on("ready", async function onReady() {
   await Promise.all(
     client.guilds.cache.map(guild => {
-      console.log(`${guild.name} ${guild.owner.user.tag}`);
+      console.log(`${guild.name}`);
       guild.colorGenerator = colorGenerator();
       return guild.roles.fetch();
     })

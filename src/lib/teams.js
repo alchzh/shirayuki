@@ -1,7 +1,12 @@
+import colorGenerator from "./colorGenerator.js";
 import { createRoom, addToRoom, deleteRoom, renameRoom } from "./rooms.js";
 
 // eslint-disable-next-line import/prefer-default-export
 export async function createTeam(guild, name) {
+  if (!guild.colorGenerator) {
+    guild.colorGenator = colorGenerator();
+  }
+
   const color = guild.colorGenerator.next().value;
 
   const teamRole = await guild.roles.create({
