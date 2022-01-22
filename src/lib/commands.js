@@ -1,18 +1,19 @@
 /* eslint-disable no-console */
 /* eslint-disable max-classes-per-file */
 
-import { Collection, Message } from "discord.js";
+import { Collection, Message, MessageReaction } from "discord.js";
 import config from "../config.js";
 import { getPermissionLevel, isTeamRole } from "./roles.js";
 
 // Custom Errors
 export class ConfirmationError extends Error {
-  constructor(confirmMessage, confirmReaction, ...args) {
+  constructor(confirmMessage, confirmReaction, denyReaction, ...args) {
     super("", ...args);
 
     this.name = "ConfirmationError";
     this.confirmMessage = confirmMessage;
     this.confirmReaction = confirmReaction;
+    this.denyReaction = denyReaction;
   }
 }
 
@@ -41,28 +42,40 @@ export async function confirm(message, prompt, force) {
   message.channel.confirmMessage = confirmMessage;
 
   const confirmReaction = await confirmMessage.react("👍");
+  const denyReaction = await confirmMessage.react("❌");
 
   const collected = await Promise.race([
     confirmMessage.awaitReactions(
-      (reaction, user) => reaction.emoji.name === "👍" && user.id === message.author.id,
+      (reaction, user) =>
+        (reaction.emoji.name === "👍" || reaction.emoji.name === "❌") &&
+        user.id === message.author.id,
       { max: 1, time: config.confirmWaitTime }
     ),
     message.channel.awaitMessages(
       m =>
         message.channel.confirmMessage === confirmMessage &&
         m.author.id === message.author.id &&
-        m.content.trim().charAt(0).toLowerCase() === "y",
+        "yn".indexOf(m.content.trim().charAt(0).toLowerCase()) > -1,
       { max: 1, time: config.confirmWaitTime }
     ),
   ]);
 
+  
   if (collected.size === 0) {
-    throw new ConfirmationError(confirmMessage, confirmReaction, prompt);
+    throw new ConfirmationError(confirmMessage, confirmReaction, denyReaction, prompt);
   }
 
   const collect = collected.first();
   if (collect instanceof Message) {
+    if (collect.content.trim().charAt(0).toLowerCase() === "n") {
+      throw new ConfirmationError(confirmMessage, confirmReaction, denyReaction, prompt);
+    }
     await confirmReaction.users.remove(message.client.user.id);
+  } else if (collect instanceof MessageReaction) {
+    if (collect.emoji.name === "❌") {
+      throw new ConfirmationError(confirmMessage, confirmReaction, denyReaction, prompt);
+    }
+    await denyReaction.users.remove(message.client.user.id);
   }
 }
 
@@ -137,6 +150,10 @@ export async function executeCommand(command, { message, arguments: _args }) {
 
       if (e.confirmReaction) {
         await e.confirmReaction.users.remove(message.client.user.id);
+      }
+
+      if (e.denyReaction) {
+        await e.denyReaction.users.remove(message.client.user.id);
       }
 
       throw e;

@@ -13,6 +13,8 @@ import serverTemplate from "./serverTemplate.js";
 import createPartialMessage from "./lib/discordjs-ext/createPartialMessage.js";
 import colorGenerator from "./lib/colorGenerator.js";
 
+const SPLITTER_REGEX = /(```.*?```|(?!\n).)+/gs;
+
 const client = new Client();
 
 client.config = config;
@@ -36,7 +38,9 @@ client.on("ready", async function onReady() {
   );
 
   client.on("message", async function onMessage(message) {
-    for (const line of message.content.split("\n")) {
+    if (message.author.id === client.user.id || !message.content || !message.content.length) return;
+
+    for (const line of message.content.match(SPLITTER_REGEX)) {
       const parsed = parser.parse(createPartialMessage(message, line), config.prefix);
       if (!parsed.success) return;
 

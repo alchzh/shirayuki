@@ -5,6 +5,7 @@ import {
   removeFromRoom,
   emptyRoom,
   createRoom,
+  createType2Room,
   deleteRoom,
   isGeneralRoom,
   renameRoom,
@@ -126,6 +127,28 @@ export const create = {
     }
   },
 };
+
+export const create2 = {
+  name: "create2",
+  shortdesc: "Create Type 2 Room(s)",
+  description:
+    'Type 2 rooms have waiting rooms. \nExample bot-style usage: `.c "Room 1" "Room 2"`\nExample NL-style usage: `.create "Room 1" "Room 2"`',
+  aliases: ["c2", "create-room-2", "create-rooms-2"],
+  permLevel: 4,
+  minArgs: 1,
+  exec: async function execCreate({ message, args, flags }) {
+    await confirm(
+      message,
+      `Are you sure you want to create the room(s) \`${args.join("`, `")}\`?`,
+      flags.force
+    );
+
+    for (const name of args) {
+      await createType2Room(message.channel.guild, name);
+    }
+  },
+};
+
 
 const deleteCommand = {
   name: "delete",

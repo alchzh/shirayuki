@@ -1,5 +1,5 @@
 export function findRoleByName(guild, roleName) {
-  return guild.roles.cache.find(role => role.name === roleName);
+  return guild.roles.cache.find(role => role.name.toLowerCase() === roleName.toLowerCase());
 }
 
 export function getPermissionLevel(member) {

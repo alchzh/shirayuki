@@ -1,6 +1,10 @@
 import { Collection } from "discord.js";
 import { isTeamRole } from "./roles.js";
 
+export function findRoomByName(guild, roomName) {
+  return guild.channels.cache.find(channel => channel.type === "category" && channel.name.toLowerCase() === roomName.toLowerCase());
+}
+
 export async function lockPerms(channel) {
   // syncs channel's perms with its parent category
   await channel.lockPermissions();
@@ -111,6 +115,40 @@ export async function createRoom(guild, name, staffSpectatorInvisible = false) {
       parent: room,
       type: "voice",
     }),
+  ]);
+
+  return room;
+}
+
+export async function createType2Room(guild, name, invisible = false) {
+  const room = await guild.channels.create(name, { type: "category" });
+
+  await room.updateOverwrite("everyone", {
+    VIEW_CHANNEL: false,
+  });
+
+  if (!invisible) {
+    await room.updateOverwrites(["staff", "spectator", "playerCoach"], {
+      VIEW_CHANNEL: true,
+    });
+  }
+
+  const cleanName = name.replace(/\s+/g, "-").toLowerCase();
+
+  await Promise.all([
+    guild.channels.create(`${cleanName}-voice`, {
+      parent: room,
+      type: "voice",
+    }).then(waitingRoom =>
+      waitingRoom.updateOverwrites(["spectator", "playerCoach"], {
+        VIEW_CHANNEL: true,
+        CONNECT: false
+      })
+    ),
+    guild.channels.create(`${cleanName}-waiting-room`, {
+      parent: room,
+      type: "voice",
+    })
   ]);
 
   return room;
