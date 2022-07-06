@@ -29,7 +29,7 @@
     "discord-command-parser": "^1.4.3",
     "discord.js": "^12.3.1",
     "hsluv": "^0.1.0",
-    "parse-url": "^5.0.1"
+    "parse-url": "^6.0.1"
   },
   "devDependencies": {
     "eslint": "^7.5.0",
